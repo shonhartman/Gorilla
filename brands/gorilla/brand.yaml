@@ -1,0 +1,56 @@
+slug: gorilla
+name: Gorilla
+tagline: "Move with power. Build with purpose."
+
+voice:
+  tone: "bold, grounded, no-nonsense"
+  personality: "A builder who leads by doing, not by talking about doing."
+  never_say:
+    - "hustle porn"
+    - "passive income"
+    - "get rich quick"
+  proof_points:
+    - "Hands-on operator, not a talking head"
+    - "Results shown, not promised"
+
+audience:
+  icp: "Ambitious small-business owners and creators who want real growth strategies, not hype."
+  pain_points:
+    - "Overwhelmed by conflicting marketing advice"
+    - "Spending on ads with no clear ROI"
+    - "No consistent content system"
+  desires:
+    - "A repeatable content engine"
+    - "Confidence that every post has a purpose"
+    - "Clear reporting on what moves the needle"
+
+platforms:
+  instagram:
+    enabled: true
+    handle: "@gorilla"
+    hashtags:
+      - "#BuildWithPurpose"
+      - "#GorillaMarketing"
+  facebook:
+    enabled: true
+    page_id: ""
+  tiktok:
+    enabled: false
+    handle: ""
+  linkedin:
+    enabled: false
+    company_id: ""
+
+content:
+  jab_ratio: 3
+  post_cadence_per_week: 5
+  formats:
+    - carousel
+    - short_video
+    - story
+    - text_post
+
+meta_ads:
+  ad_account_id: ""
+  pixel_id: ""
+  default_objective: "OUTCOME_ENGAGEMENT"

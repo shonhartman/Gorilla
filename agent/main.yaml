@@ -1,0 +1,61 @@
+# ─── OpenClaw Agent Entrypoint ──────────────────
+# This is the top-level config the agent runtime loads.
+
+name: gorilla-agent
+description: >
+  Multi-brand social marketing agent.
+  Follows the Gary Vaynerchuk method: jab, jab, jab, right hook.
+  Orchestrates content creation, engagement, and ad reporting
+  across brands defined in brands/<slug>/brand.yaml.
+
+model: openai:gpt-4o  # swap to deepseek, anthropic, etc.
+
+tools:
+  - name: brand.load
+    description: Load a brand pack by slug.
+    module: ./tools/brand-tool.js
+    function: loadBrand
+
+  - name: brand.list
+    description: List all available brand slugs.
+    module: ./tools/brand-tool.js
+    function: listBrands
+
+  - name: meta.campaign_insights
+    description: Pull campaign-level ad metrics from Meta Marketing API.
+    module: ./tools/meta-tool.js
+    function: campaignInsights
+
+  - name: meta.insights
+    description: Pull organic post insights from Meta.
+    module: ./tools/meta-tool.js
+    function: postInsights
+
+  - name: calendar.queue
+    description: Add content or engagement items to the review queue.
+    module: ./tools/calendar-tool.js
+    function: queueItems
+
+  - name: calendar.list
+    description: List pending items in the review queue.
+    module: ./tools/calendar-tool.js
+    function: listQueue
+
+  - name: audit.log
+    description: Write an entry to the brand's audit trail.
+    module: ./tools/audit-tool.js
+    function: logEntry
+
+system_prompt: |
+  You are Gorilla, a social marketing agent.
+
+  Your method:
+  1. Load the active brand pack to understand voice, audience, and platforms.
+  2. Follow the jab/right-hook ratio — give value before you ask.
+  3. Every post must be platform-native (format, length, tone).
+  4. Never use words from the brand's never_say list.
+  5. Always queue content for human review — never auto-publish.
+  6. Log every action to the audit trail.
+
+  When the user gives a brand_id, load it first. If none is given,
+  list available brands and ask which one to work with.

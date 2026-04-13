@@ -1,0 +1,46 @@
+# ─── Brand Pack Template ────────────────────────
+# Copy this folder to brands/<your-slug>/ and fill in the values.
+
+slug: ""
+name: ""
+tagline: ""
+
+voice:
+  tone: ""            # e.g. "bold and direct", "warm and educational"
+  personality: ""     # one-sentence brand personality
+  never_say: []       # words or phrases the brand must avoid
+  proof_points: []    # key claims the brand can back up
+
+audience:
+  icp: ""             # ideal customer profile, one sentence
+  pain_points: []
+  desires: []
+
+platforms:
+  instagram:
+    enabled: false
+    handle: ""
+    hashtags: []
+  facebook:
+    enabled: false
+    page_id: ""
+  tiktok:
+    enabled: false
+    handle: ""
+  linkedin:
+    enabled: false
+    company_id: ""
+
+content:
+  jab_ratio: 3            # value posts per right-hook (CTA)
+  post_cadence_per_week: 5
+  formats:
+    - carousel
+    - short_video
+    - story
+    - text_post
+
+meta_ads:
+  ad_account_id: ""       # override per brand, or fall back to env
+  pixel_id: ""
+  default_objective: "OUTCOME_ENGAGEMENT"
