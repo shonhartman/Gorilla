@@ -1,0 +1,68 @@
+# ─── Ad Readout ─────────────────────────────────
+# Weekly summary of Meta ad performance per brand.
+
+name: ad-readout
+description: >
+  Pull campaign-level metrics from the Meta Marketing API,
+  compare to previous period, and produce a plain-language
+  summary the brand owner can act on.
+
+trigger: cron  # "every Monday 09:00 brand-local-time"
+
+steps:
+  - id: load-brand
+    action: brand.load
+    inputs:
+      brand_id: "{{ brand_id }}"
+
+  - id: pull-metrics
+    action: meta.campaign_insights
+    inputs:
+      ad_account_id: "{{ brand.meta_ads.ad_account_id }}"
+      date_range: last_7_days
+      metrics:
+        - spend
+        - impressions
+        - reach
+        - cpc
+        - ctr
+        - conversions
+        - cost_per_result
+
+  - id: compare-prior
+    action: meta.campaign_insights
+    inputs:
+      ad_account_id: "{{ brand.meta_ads.ad_account_id }}"
+      date_range: prior_7_days
+      metrics:
+        - spend
+        - impressions
+        - reach
+        - cpc
+        - ctr
+        - conversions
+        - cost_per_result
+
+  - id: summarize
+    action: llm.complete
+    inputs:
+      system_prompt: |
+        You are a media buyer analyst. Write a clear, jargon-light summary
+        of ad performance for "{{ brand.name }}". Highlight what improved,
+        what declined, and one concrete next step.
+      user_prompt: |
+        This week:
+        {{ pull_metrics.output }}
+
+        Prior week:
+        {{ compare_prior.output }}
+
+        Summarize in 3-5 bullet points, then give one recommendation.
+
+  - id: deliver
+    action: notify.send
+    inputs:
+      brand_id: "{{ brand_id }}"
+      channel: email
+      subject: "{{ brand.name }} — Weekly Ad Readout"
+      body: "{{ summarize.output }}"

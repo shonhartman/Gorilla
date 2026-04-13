@@ -1,0 +1,52 @@
+# ─── Comment Mining ─────────────────────────────
+# Monitors target accounts and surfaces engagement opportunities.
+
+name: comment-mining
+description: >
+  Scan posts from targeted accounts in the brand's niche.
+  Surface high-intent comments and suggest replies that
+  add value (jabs) without being salesy.
+
+trigger: cron  # "daily 10:00, 15:00 brand-local-time"
+
+steps:
+  - id: load-brand
+    action: brand.load
+    inputs:
+      brand_id: "{{ brand_id }}"
+
+  - id: fetch-target-posts
+    action: social.fetch_recent
+    description: Pull recent posts from accounts the brand follows for ideas.
+    inputs:
+      brand_id: "{{ brand_id }}"
+      source: target_accounts
+      limit: 50
+
+  - id: identify-opportunities
+    action: llm.complete
+    description: >
+      Find comments where the brand can add genuine value.
+      Filter out anything that would feel forced or spammy.
+    inputs:
+      system_prompt: |
+        You surface engagement opportunities for the brand "{{ brand.name }}".
+        A good opportunity:
+        - Someone expressing a pain point the brand solves.
+        - A question the brand has expertise to answer.
+        - A conversation where a thoughtful reply would be noticed.
+        Skip anything where jumping in would feel like an ad.
+      user_prompt: |
+        Here are {{ fetch_target_posts.count }} recent posts and their comments.
+        {{ fetch_target_posts.output }}
+
+        Return a list of opportunities with:
+        - post_url, comment_snippet, suggested_reply, reason
+
+  - id: queue-replies
+    action: calendar.queue
+    inputs:
+      brand_id: "{{ brand_id }}"
+      items: "{{ identify_opportunities.output }}"
+      type: engagement_reply
+      status: pending_review

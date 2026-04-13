@@ -1,0 +1,58 @@
+# ─── Weekly Content Pass ────────────────────────
+# Generates a week of posts following the jab/right-hook ratio.
+
+name: weekly-content-pass
+description: >
+  Draft a full week of content for the active brand.
+  Respects jab_ratio (value vs CTA), platform-specific formats,
+  and the brand voice. Outputs a calendar of posts for review.
+
+trigger: cron  # "every Monday 08:00 brand-local-time"
+
+steps:
+  - id: load-brand
+    action: brand.load
+    inputs:
+      brand_id: "{{ brand_id }}"
+
+  - id: audit-last-week
+    action: meta.insights
+    description: Pull last 7 days of post performance for context.
+    inputs:
+      brand_id: "{{ brand_id }}"
+      date_range: last_7_days
+      metrics:
+        - reach
+        - engagement
+        - link_clicks
+
+  - id: generate-calendar
+    action: llm.complete
+    description: >
+      Using brand voice, audience pain points, proof points,
+      and last week's performance, draft this week's posts.
+    inputs:
+      system_prompt: |
+        You are a social media strategist following the Gary Vaynerchuk method.
+        Rules:
+        - {{ brand.content.jab_ratio }} value posts ("jabs") for every 1 CTA ("right hook").
+        - Each post must be native to its platform (length, tone, format).
+        - Reference the brand voice: {{ brand.voice.tone }}.
+        - Never use phrases from the brand's never_say list.
+      user_prompt: |
+        Brand: {{ brand.name }}
+        Audience: {{ brand.audience.icp }}
+        Pain points: {{ brand.audience.pain_points | join(", ") }}
+        Last week's top post topic: {{ audit_last_week.top_post_topic }}
+
+        Draft {{ brand.content.post_cadence_per_week }} posts for this week.
+        Label each as JAB or RIGHT_HOOK.
+        Include: platform, format, copy, hashtags, and a suggested visual direction.
+
+  - id: queue-for-review
+    action: calendar.queue
+    description: Place drafts into the review queue for human approval.
+    inputs:
+      brand_id: "{{ brand_id }}"
+      posts: "{{ generate_calendar.output }}"
+      status: pending_review
